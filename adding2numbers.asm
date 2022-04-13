@@ -132,6 +132,8 @@ _start:
 	    div ecx                 ;   edx = y%10;     eax = y/10
 	    
 	    cmp edx, 0
+	    mov ebx, 1
+	    mov [ok], ebx
 	    je zero_in_coada
 	    jmp resume
 	    
@@ -139,9 +141,6 @@ _start:
 	        xor ebx, ebx
 	        cmp ebx, [ok]
 	        je inc_cnt
-	        
-	        mov ebx, 0x1
-	        mov [ok], ebx
 	        
 	        jmp resume
 	        

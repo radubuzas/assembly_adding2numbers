@@ -1,12 +1,13 @@
 section .data
 
-
 section .bss
 	x_buffer: resd 1
-	x: resd 4
+	x: resd 8
 	y: resd 8
 	p: resd 1
 	cnt: resd 1
+	ok: resd 1
+	zero: resd 1
 
 section .text
 	global _start
@@ -15,9 +16,13 @@ _start:
 	xor eax, eax
 	mov [x], eax
 	mov [cnt], eax
+	mov [ok], eax
 	
 	mov eax, 10
 	mov [p], eax
+	
+	mov eax, 0x30
+	mov [zero], eax
 	
 	;citire numar x
 	et_citire:
@@ -116,6 +121,7 @@ _start:
     xor eax, eax
     mov [x], eax                ;   x = 0
     
+    
     et_oglindit:
         
         xor edx, edx            ;   pregatire edx pentru impartire
@@ -124,6 +130,27 @@ _start:
 	    mov eax, [y]            ;   eax = y
 	    mov ecx, 10             ;   ecx = 10
 	    div ecx                 ;   edx = y%10;     eax = y/10
+	    
+	    cmp edx, 0
+	    je zero_in_coada
+	    jmp resume
+	    
+	    zero_in_coada:
+	        xor ebx, ebx
+	        cmp ebx, [ok]
+	        je inc_cnt
+	        
+	        mov ebx, 0x1
+	        mov [ok], ebx
+	        
+	        jmp resume
+	        
+	        inc_cnt:
+	            mov ebx, [cnt]
+	            inc ebx
+	            mov [cnt], ebx
+	    
+	    resume:
 	    
 	    mov [x_buffer], edx     ;   cifra este pusa in x_buffer
 	    mov [y], eax            ;   y = y/10
@@ -164,14 +191,29 @@ _start:
     	
     	mov eax, [x]
     	cmp eax, 0
-    	je terminate
+    	je afis_zero
     	
     	jmp et_print
     	
-
-
-	terminate:
+    afis_zero:
 	
+	    xor ebx, ebx
+	    cmp [cnt], ebx
+	    je terminate
+	    
+	    mov eax, 0x4
+    	mov ebx, 0x1
+    	mov ecx, zero
+    	mov edx, 0x1
+    	int 0x80
+    	
+    	mov eax, [cnt]
+    	dec eax
+    	mov [cnt], eax
+    	
+    	jmp afis_zero
+	
+	terminate:
     	mov eax, 0x1
     	xor ebx, ebx
     	int 0x80
